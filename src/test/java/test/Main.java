@@ -17,7 +17,7 @@ public class Main
         try
         {
             Files.move(Paths.get(oldPath), Paths.get(newPath));
-            org.bukkit.craftbukkit.Main.main(args);
+            //org.bukkit.craftbukkit.Main.main(args);
         }
         catch (IOException ex) { System.out.println("Failed to move plugin to test server"); }
     }

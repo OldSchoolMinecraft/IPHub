@@ -4,7 +4,6 @@ import net.oldschoolminecraft.iph.IPHub;
 import org.bukkit.util.config.Configuration;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,11 +34,15 @@ public class PLConfig extends Configuration
         generateConfigOption("settings.passthrough.ipList", "first,second,third,etc");
         generateConfigOption("settings.passthrough.nameList", "first,second,third,etc");
 
+        generateConfigOption("settings.blacklist.ipRangeList", "first,second,third");
+        generateConfigOption("settings.blacklist.asnList", "first,second,third");
+
         generateConfigOption("settings.messages.vpnDetected", "&cVPN detected");
         generateConfigOption("settings.messages.vpnDetectedNotif", "&cKICKED: &e{player} &cdetected with VPN");
         generateConfigOption("settings.messages.notChecked", "&cFailed to check VPN");
         generateConfigOption("settings.messages.vpnPossible", "&e{player} might have a VPN");
         generateConfigOption("settings.messages.checkingError", "&cError while checking {player} for VPN");
+        generateConfigOption("settings.messages.blacklisted", "&cBLACKLISTED");
 
         generateConfigOption("settings.developer.debug", false);
         generateConfigOption("settings.developer.disclaimer", "ONLY ENABLE THIS SETTING IF YOU KNOW WHAT YOU ARE DOING");

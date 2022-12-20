@@ -40,6 +40,16 @@ public class PlayerHandler extends PlayerListener
             List<String> passthroughName = config.getConfigList("settings.passthrough.nameList");
             List<String> passthroughIP = config.getConfigList("settings.passthrough.ipList");
 
+            List<String> ipBlacklist = config.getConfigList("settings.blacklist.ipRangeList");
+            List<String> asnBlacklist = config.getConfigList("settings.blacklist.asnList");
+
+            String ip = event.getAddress().getHostAddress();
+            if (ip.equals("127.0.0.1"))
+            {
+                pause.removeConnectionPause();
+                return;
+            }
+
             if (passthroughName.contains(event.getName()))
             {
                 pause.removeConnectionPause();
@@ -52,6 +62,17 @@ public class PlayerHandler extends PlayerListener
                 return;
             }
 
+            for (String range : ipBlacklist)
+            {
+                if (event.getAddress().getHostAddress().matches(range))
+                {
+                    System.out.println("[IPHub] Player is IP blacklisted: " + event.getName() + ", " + event.getAddress().getHostAddress());
+                    event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', "&c"));
+                    pause.removeConnectionPause();
+                    return;
+                }
+            }
+
             IPHubResponse iphr = cache.get(event.getName());
             if (iphr != null && iphr.block != 1)
             {
@@ -61,9 +82,10 @@ public class PlayerHandler extends PlayerListener
                 return;
             }
 
-            String ip = event.getAddress().getHostAddress();
-            if (ip.equals("127.0.0.1"))
+            if (asnBlacklist.contains(iphr.asn))
             {
+                System.out.println("[IPHub] Player is ASN blacklisted: " + event.getName() + ", " + iphr.asn);
+                event.cancelPlayerLogin(String.valueOf(config.getConfigOption("settings.messages.blacklisted")));
                 pause.removeConnectionPause();
                 return;
             }
