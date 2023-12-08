@@ -9,7 +9,7 @@ public class ColorUtil
         {
             if (b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i + 1]) > -1)
             {
-                b[i] = '§';
+                b[i] = '\u00a7';
                 b[i + 1] = Character.toLowerCase(b[i + 1]);
             }
         }
