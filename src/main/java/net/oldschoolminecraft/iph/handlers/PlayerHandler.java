@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPreLoginEvent;
 
+import java.io.IOException;
 import java.util.List;
 
 public class PlayerHandler extends PlayerListener
@@ -42,6 +43,7 @@ public class PlayerHandler extends PlayerListener
 
             List<String> ipBlacklist = config.getConfigList("settings.blacklist.ipRangeList");
             List<String> asnBlacklist = config.getConfigList("settings.blacklist.asnList");
+            List<String> ccBlacklist = config.getConfigList("settings.blacklist.ccList");
 
             String ip = event.getAddress().getHostAddress();
             if (ip.equals("127.0.0.1"))
@@ -67,65 +69,87 @@ public class PlayerHandler extends PlayerListener
                 if (event.getAddress().getHostAddress().matches(range))
                 {
                     System.out.println("[IPHub] Player is IP blacklisted: " + event.getName() + ", " + event.getAddress().getHostAddress());
-                    event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', "&c"));
+                    event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.blacklisted"))));
                     pause.removeConnectionPause();
                     return;
                 }
             }
 
-            IPHubResponse iphr = cache.get(event.getName());
-            if (iphr != null && iphr.block != 1)
+            IPHubResponse iphr = cache.get(ip);
+            if (iphr != null && iphr.block == 2)
             {
-                if (iphr.block == 2)
-                    adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.vpnPossible")), event.getName(), iphr), "iphub.warnblock2");
+                // do not cancel login, simply warn online staff
+                adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.vpnPossible")), event.getName(), iphr), "iphub.warnblock2");
                 pause.removeConnectionPause();
                 return;
             }
 
-            if (asnBlacklist.contains(iphr.asn))
+            if (iphr != null && iphr.block == 1)
             {
-                System.out.println("[IPHub] Player is ASN blacklisted: " + event.getName() + ", " + iphr.asn);
+                event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.vpnDetected"))));
+                adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.vpnDetectedNotif")), event.getName(), iphr), "iphub.ipalert");
+                pause.removeConnectionPause();
+                return;
+            }
+
+            if (iphr != null && asnBlacklist.contains(String.valueOf(iphr.asn)))
+            {
+                System.out.println("[IPHub] Player's ISP is blacklisted: " + event.getName() + ", " + iphr.asn);
+                event.cancelPlayerLogin(String.valueOf(config.getConfigOption("settings.messages.blacklisted")));
+                pause.removeConnectionPause();
+                return;
+            }
+
+            if (iphr != null && ccBlacklist.contains(iphr.countryCode))
+            {
+                System.out.println("[IPHub] Player's country is blacklisted: " + event.getName() + ", " + iphr.countryName);
                 event.cancelPlayerLogin(String.valueOf(config.getConfigOption("settings.messages.blacklisted")));
                 pause.removeConnectionPause();
                 return;
             }
 
             if (lastStatusCode == 429) needBackupKey = !needBackupKey; // if rate limit is hit, switch keys.
-            CloseableHttpClient httpclient = HttpClients.createDefault();
-            HttpGet httpGet = new HttpGet("http://v2.api.iphub.info/ip/" + ip);
-            httpGet.setHeader("X-Key", String.valueOf(config.getConfigOption(needBackupKey ? "settings.api.backupKey" : "settings.api.key")));
-            try (CloseableHttpResponse res = httpclient.execute(httpGet))
+            try (CloseableHttpClient httpclient = HttpClients.createDefault())
             {
-                HttpEntity ent = res.getEntity();
-                int resCode = res.getStatusLine().getStatusCode();
-                lastStatusCode = resCode;
-                String rawResponse = EntityUtils.toString(ent);
-                if ((Boolean) config.getConfigOption("settings.developer.debug"))
-                    System.out.println(rawResponse);
-                IPHubResponse response = gson.fromJson(rawResponse, IPHubResponse.class);
-                if (resCode != 200 && resCode != 429)
+                HttpGet httpGet = new HttpGet("http://v2.api.iphub.info/ip/" + ip);
+                httpGet.setHeader("X-Key", String.valueOf(config.getConfigOption(needBackupKey ? "settings.api.backupKey" : "settings.api.key")));
+                try (CloseableHttpResponse res = httpclient.execute(httpGet))
                 {
-                    adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.notChecked")), event.getName(), response), "iphub.warnblock2");
-                    event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', ""));
+                    HttpEntity ent = res.getEntity();
+                    int resCode = res.getStatusLine().getStatusCode();
+                    lastStatusCode = resCode;
+                    String rawResponse = EntityUtils.toString(ent);
+                    if ((Boolean) config.getConfigOption("settings.developer.debug"))
+                        System.out.println(rawResponse);
+                    IPHubResponse response = gson.fromJson(rawResponse, IPHubResponse.class);
+                    if (resCode != 200 && resCode != 429)
+                    {
+                        adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.checkingError")), event.getName(), response), "iphub.warnblock2");
+                        event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.notChecked"))));
+                        pause.removeConnectionPause();
+                        return;
+                    }
+                    if ((Boolean) config.getConfigOption("settings.logging.enabled"))
+                        System.out.println(String.format("[IPHub Log] %s: %s %s, %s (%s)", event.getName(), response.countryCode, ip, response.isp, response.asn));
+                    if (response.block == 1)
+                    {
+                        event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.vpnDetected"))));
+                        adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.vpnDetectedNotif")), event.getName(), response), "iphub.ipalert");
+                        pause.removeConnectionPause();
+                        return;
+                    }
+                    if (response.block == 2)
+                        adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.vpnPossible")), event.getName(), response), "iphub.warnblock2");
+                    EntityUtils.consume(ent);
                     pause.removeConnectionPause();
-                    return;
-                }
-                if ((Boolean) config.getConfigOption("settings.logging.enabled"))
-                    System.out.println(String.format("[IPHub Log] %s: %s %s, %s (%s)", event.getName(), response.countryCode, ip, response.isp, response.asn));
-                if (response.block == 1)
-                {
-                    event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.vpnDetected"))));
-                    adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.vpnDetectedNotif")), event.getName(), response), "iphub.ipalert");
+                    cache.put(ip, response);
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                    event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.notChecked"))));
                     pause.removeConnectionPause();
-                    return;
                 }
-                if (response.block == 2)
-                    adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.vpnPossible")), event.getName(), response), "iphub.warnblock2");
-                EntityUtils.consume(ent);
-                pause.removeConnectionPause();
-                cache.put(event.getName(), response);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace(System.err);
                 event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.notChecked"))));
                 pause.removeConnectionPause();
             }
