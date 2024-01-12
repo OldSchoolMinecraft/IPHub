@@ -1,5 +1,5 @@
 name: IPHub
-version: 1.1
+version: 1.2
 main: net.oldschoolminecraft.iph.IPHub
 author: moderator_man
 commands:
