@@ -17,7 +17,7 @@ public class IPHubRequest
 
     private String ip;
     private String apiKey;
-    private int statusCode = 500;
+    private int statusCode = -1;
 
     public IPHubRequest(String ip, String apiKey)
     {
