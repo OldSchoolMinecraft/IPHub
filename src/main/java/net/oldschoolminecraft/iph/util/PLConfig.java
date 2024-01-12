@@ -36,11 +36,11 @@ public class PLConfig extends Configuration
 
         generateConfigOption("settings.blacklist.ipRangeList", "first,second,third");
         generateConfigOption("settings.blacklist.asnList", "first,second,third");
-        generateConfigOption("settings.blacklist.cnList", "first,second,third");
+        generateConfigOption("settings.blacklist.ccList", "first,second,third");
 
         generateConfigOption("settings.messages.vpnDetected", "&cVPN detected");
         generateConfigOption("settings.messages.vpnDetectedNotif", "&cKICKED: &e{player} &cdetected with VPN");
-        generateConfigOption("settings.messages.notChecked", "&cFailed to check for VPN");
+        generateConfigOption("settings.messages.notChecked", "&cFailed to check VPN");
         generateConfigOption("settings.messages.vpnPossible", "&e{player} might have a VPN");
         generateConfigOption("settings.messages.checkingError", "&cError while checking {player} for VPN");
         generateConfigOption("settings.messages.blacklisted", "&cBLACKLISTED");
