@@ -1,38 +1,34 @@
 package net.oldschoolminecraft.iph;
 
-import net.oldschoolminecraft.iph.handlers.PlayerHandler;
-import net.oldschoolminecraft.iph.util.ColorUtil;
+import com.google.gson.Gson;
+import net.oldschoolminecraft.iph.cmd.IPHistory;
+import net.oldschoolminecraft.iph.cmd.Reload;
+import net.oldschoolminecraft.iph.cmd.ToggleIPNotif;
+import net.oldschoolminecraft.iph.tracking.LookupManager;
 import net.oldschoolminecraft.iph.util.PLConfig;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class IPHub extends JavaPlugin
 {
     public static IPHub instance;
+    private static Gson gson = new Gson();
 
     public PLConfig config;
+    public LookupManager lookupManager;
 
     public void onEnable()
     {
         instance = this;
         config = new PLConfig();
+        lookupManager = new LookupManager();
 
         getServer().getPluginManager().registerEvents(new PlayerHandler(), this);
 
-        System.out.println("IPHub enabled");
-    }
+        getCommand("iphr").setExecutor(new Reload(config));
+        getCommand("iphistory").setExecutor(new IPHistory(lookupManager));
+        getCommand("ipnotif").setExecutor(new ToggleIPNotif());
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
-    {
-        if (label.equalsIgnoreCase("iphr") && (sender.hasPermission("iphub.reload") || sender.isOp()))
-        {
-            config.reload();
-            sender.sendMessage(ColorUtil.translateAlternateColorCodes('&', "&aIPHub configuration reloaded"));
-            return true;
-        }
-        return false;
+        System.out.println("IPHub enabled");
     }
 
     public void onDisable()

@@ -1,7 +1,20 @@
 name: IPHub
-version: 1.0
+version: 1.1
 main: net.oldschoolminecraft.iph.IPHub
 author: moderator_man
 commands:
   iphr:
     description: Reload IPHub configuration
+    usage: /iphr
+    default: op
+    permission: iphub.reload
+  iphistory:
+    description: View player IP history
+    usage: /iphistory <username/ip>
+    default: op
+    permission: iphub.ipview
+  ipnotif:
+    description: Toggle your IP notifications
+    usage: /ipnotif
+    default: op
+    permission: iphub.ipview
