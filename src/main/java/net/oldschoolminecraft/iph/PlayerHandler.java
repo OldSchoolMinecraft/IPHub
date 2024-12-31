@@ -27,12 +27,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class PlayerHandler extends PlayerListener
 {
     private static final Gson gson = new Gson();
 
-    private final MemoryCache<String, IPHubResponse> cache = new MemoryCache<>(60 * 60 /* 1 hour */, 3, 10000);
+    private final MemoryCache<String, IPHubResponse> cache;
     private final PLConfig config = IPHub.instance.config;
     private int lastStatusCode = 200;
     private boolean needBackupKey = false;
@@ -49,6 +50,11 @@ public class PlayerHandler extends PlayerListener
 
     public PlayerHandler()
     {
+        long minutesTTL = (long) config.getConfigOption("settings.cache.minutesTTL");
+        int interval = (int) config.getConfigOption("settings.cache.interval");
+        int maxItems = (int) config.getConfigOption("settings.cache.maxItems");
+        cache = new MemoryCache<>(TimeUnit.MINUTES.toMillis(minutesTTL), interval, maxItems);
+
         passthroughName = config.getConfigList("settings.passthrough.nameList");
         passthroughIP = config.getConfigList("settings.passthrough.ipList");
 
@@ -70,6 +76,10 @@ public class PlayerHandler extends PlayerListener
     @EventHandler
     public void onPlayerPreLogin(PlayerPreLoginEvent event)
     {
+        // do not waste requests on non-whitelisted players while the whitelist is enabled
+        if (Bukkit.hasWhitelist() && !Bukkit.getOfflinePlayer(event.getName()).isWhitelisted())
+            return;
+
         ConnectionPause pause = event.addConnectionPause(IPHub.instance, "IPHub");
         new Thread(() ->
         {

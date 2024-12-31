@@ -44,6 +44,9 @@ public class PLConfig extends Configuration
         generateConfigOption("settings.messages.vpnPossible", "&e{player} might have a VPN");
         generateConfigOption("settings.messages.checkingError", "&cError while checking {player} for VPN");
         generateConfigOption("settings.messages.blacklisted", "&cBLACKLISTED");
+        generateConfigOption("settings.cache.minutesTTL", 60L);
+        generateConfigOption("settings.cache.interval", 3);
+        generateConfigOption("settings.cache.maxItems", 10000);
 
         generateConfigOption("settings.developer.debug", false);
         generateConfigOption("settings.developer.disclaimer", "ONLY ENABLE THIS SETTING IF YOU KNOW WHAT YOU ARE DOING");
