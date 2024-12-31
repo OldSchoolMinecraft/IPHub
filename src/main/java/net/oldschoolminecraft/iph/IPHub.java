@@ -8,6 +8,8 @@ import net.oldschoolminecraft.iph.tracking.LookupManager;
 import net.oldschoolminecraft.iph.util.PLConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+
 public class IPHub extends JavaPlugin
 {
     public static IPHub instance;
@@ -15,10 +17,12 @@ public class IPHub extends JavaPlugin
 
     public PLConfig config;
     public LookupManager lookupManager;
+    private UpdateManager updateManager;
 
     public void onEnable()
     {
         instance = this;
+        updateManager = new UpdateManager(this, "https://micro.os-mc.net/plugin_ci/IPHub/latest");
         config = new PLConfig();
         lookupManager = new LookupManager();
 
@@ -31,8 +35,14 @@ public class IPHub extends JavaPlugin
         System.out.println("IPHub enabled");
     }
 
+    public File getPluginFile()
+    {
+        return getFile();
+    }
+
     public void onDisable()
     {
+        updateManager.checkForUpdates();
         System.out.println("IPHub disabled");
     }
 }
