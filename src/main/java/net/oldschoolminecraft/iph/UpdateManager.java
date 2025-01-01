@@ -39,8 +39,8 @@ public class UpdateManager
                 return;
             }
 
-            String updateVersion = updateData.get("updateVersion").getAsString();
-            String fileURL = updateData.get("fileURL").getAsString();
+            String updateVersion = updateData.get("version").getAsString();
+            String fileURL = updateData.get("url").getAsString();
 
             if (isNewVersion(updateVersion))
                 downloadUpdate(fileURL);
@@ -79,7 +79,7 @@ public class UpdateManager
     {
         try
         {
-            File updateFolderHandle = new File(Bukkit.getUpdateFolder());
+            File updateFolderHandle = new File("plugins/update/");
             if (!updateFolderHandle.exists()) updateFolderHandle.mkdirs();
             Path updateFolder = new File(Bukkit.getUpdateFolder()).toPath();
             Path updateFile = updateFolder.resolve(plugin.getPluginFile().getName());
