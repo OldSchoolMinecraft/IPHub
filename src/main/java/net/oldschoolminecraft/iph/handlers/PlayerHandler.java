@@ -95,7 +95,7 @@ public class PlayerHandler extends PlayerListener
             if (iphr != null && asnBlacklist.contains(String.valueOf(iphr.asn)))
             {
                 System.out.println("[IPHub] Player's ISP is blacklisted: " + event.getName() + ", " + iphr.asn);
-                event.cancelPlayerLogin(String.valueOf(config.getConfigOption("settings.messages.blacklisted")));
+                event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.blacklisted"))));
                 pause.removeConnectionPause();
                 return;
             }
@@ -103,7 +103,7 @@ public class PlayerHandler extends PlayerListener
             if (iphr != null && ccBlacklist.contains(iphr.countryCode))
             {
                 System.out.println("[IPHub] Player's country is blacklisted: " + event.getName() + ", " + iphr.countryName);
-                event.cancelPlayerLogin(String.valueOf(config.getConfigOption("settings.messages.blacklisted")));
+                event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.blacklisted"))));
                 pause.removeConnectionPause();
                 return;
             }
