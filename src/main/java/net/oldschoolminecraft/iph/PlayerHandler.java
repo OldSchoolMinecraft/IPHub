@@ -60,7 +60,7 @@ public class PlayerHandler extends PlayerListener
 
         ipBlacklist = config.getConfigList("settings.blacklist.ipRangeList");
         asnBlacklist = config.getConfigList("settings.blacklist.asnList");
-        cnBlacklist = config.getConfigList("settings.blacklist.cnList");
+        cnBlacklist = config.getConfigList("settings.blacklist.ccList");
 
         apiKey = String.valueOf(config.getConfigOption("settings.api.key"));
         backupKey = String.valueOf(config.getConfigOption("settings.api.backupKey"));
