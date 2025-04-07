@@ -1,7 +1,6 @@
 /.gradle/
 /.idea/
 /build/
-/libs/
 /plugins/
 /world/
 /world_nether/

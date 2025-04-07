@@ -15,6 +15,7 @@ public class NameLookup
 
     public void addIP(String ip)
     {
+        if (addresses.contains(ip)) return; // IP already recorded
         addresses.add(ip);
     }
 

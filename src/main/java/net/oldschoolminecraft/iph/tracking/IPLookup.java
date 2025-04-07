@@ -15,6 +15,7 @@ public class IPLookup
 
     public void addName(String name)
     {
+        if (names.contains(name)) return; // Name already recorded
         this.names.add(name);
     }
 
