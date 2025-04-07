@@ -79,8 +79,13 @@ public class LookupManager
         try (FileWriter nameWriter = new FileWriter(nameFile);
              FileWriter ipWriter = new FileWriter(ipFile))
         {
+            if (nameLookup == null || ipLookup == null)
+                System.out.println("[IPHub] Started tracking new IP/user (" + ip + "/" + name + ")");
+            else System.out.println("[IPHub] Updated tracking info for IP/user (" + ip + "/" + name + ")");
+
             if (nameLookup == null) nameLookup = new NameLookup();
             if (ipLookup == null) ipLookup = new IPLookup();
+
             nameLookup.addIP(ip);
             ipLookup.addName(name);
 

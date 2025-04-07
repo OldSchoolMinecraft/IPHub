@@ -220,7 +220,6 @@ public class PlayerHandler extends PlayerListener
     {
         LookupManager lookupManager = IPHub.instance.lookupManager;
         lookupManager.updateLookupData(username, ip);
-        System.out.println("[IPHub] Started tracking new IP/user (" + ip + "/" + username + ")");
     }
 
     @EventHandler
