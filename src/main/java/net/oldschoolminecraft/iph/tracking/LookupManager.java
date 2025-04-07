@@ -83,6 +83,10 @@ public class LookupManager
             if (ipLookup == null) ipLookup = new IPLookup();
             nameLookup.addIP(ip);
             ipLookup.addName(name);
+
+            nameLookup.enforceNoDuplicates();
+            ipLookup.enforceNoDuplicates();
+
             gson.toJson(nameLookup, NameLookup.class, nameWriter);
             gson.toJson(ipLookup, IPLookup.class, ipWriter);
         } catch (Exception ex) {

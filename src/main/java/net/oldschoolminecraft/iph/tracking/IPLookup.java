@@ -3,6 +3,7 @@ package net.oldschoolminecraft.iph.tracking;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class IPLookup
 {
@@ -11,6 +12,13 @@ public class IPLookup
     public IPLookup()
     {
         names = new ArrayList<>();
+    }
+
+    public void enforceNoDuplicates()
+    {
+        List<String> names = this.names.stream().distinct().collect(Collectors.toList());
+        this.names.clear();
+        this.names.addAll(names);
     }
 
     public void addName(String name)
