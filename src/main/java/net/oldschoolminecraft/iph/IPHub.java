@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import net.oldschoolminecraft.iph.cmd.IPHistory;
 import net.oldschoolminecraft.iph.cmd.Reload;
 import net.oldschoolminecraft.iph.cmd.ToggleIPNotif;
+import net.oldschoolminecraft.iph.handlers.PlayerHandler;
 import net.oldschoolminecraft.iph.tracking.LookupManager;
 import net.oldschoolminecraft.iph.util.PLConfig;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,17 +19,19 @@ public class IPHub extends JavaPlugin
     public PLConfig config;
     public LookupManager lookupManager;
     private UpdateManager updateManager;
+    public PlayerHandler playerHandler;
 
     public void onEnable()
     {
         instance = this;
+        playerHandler = new PlayerHandler();
         updateManager = new UpdateManager(this, "https://micro.os-mc.net/plugin_ci/IPHub/latest");
         config = new PLConfig();
         lookupManager = new LookupManager();
 
-        getServer().getPluginManager().registerEvents(new PlayerHandler(), this);
+        getServer().getPluginManager().registerEvents(playerHandler, this);
 
-        getCommand("iphr").setExecutor(new Reload(config));
+        getCommand("iphr").setExecutor(new Reload(this));
         getCommand("iphistory").setExecutor(new IPHistory(lookupManager));
         getCommand("ipnotif").setExecutor(new ToggleIPNotif());
 

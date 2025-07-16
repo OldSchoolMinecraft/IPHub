@@ -22,15 +22,29 @@ import org.bukkit.event.player.PlayerPreLoginEvent;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class PlayerHandler extends PlayerListener
 {
     private static final Gson gson = new Gson();
 
-    private final MemoryCache<String, IPHubResponse> cache = new MemoryCache<>(60 * 5, 3, 10000);
+    private MemoryCache<String, IPHubResponse> cache;
     private final PLConfig config = IPHub.instance.config;
     private int lastStatusCode = 200;
     private boolean needBackupKey = false;
+
+    public PlayerHandler()
+    {
+        reloadCacheConfig();
+    }
+
+    public void reloadCacheConfig()
+    {
+        int minutesTTL = (int) config.getConfigOption("settings.cache.minutesTTL");
+        int interval = (int) config.getConfigOption("settings.cache.interval");
+        int maxItems = (int) config.getConfigOption("settings.cache.maxItems");
+        cache = new MemoryCache<>(TimeUnit.MINUTES.toMillis(minutesTTL), interval, maxItems);
+    }
 
     @EventHandler
     public void onPlayerPreLogin(PlayerPreLoginEvent event)
@@ -54,6 +68,7 @@ public class PlayerHandler extends PlayerListener
 
             if (passthroughName.contains(event.getName()))
             {
+                System.out.println("[IPHub] Player's name is on the passthrough list; all checks have been skipped");
                 pause.removeConnectionPause();
                 return;
             }
@@ -79,6 +94,7 @@ public class PlayerHandler extends PlayerListener
             if (iphr != null && iphr.block == 2)
             {
                 // do not cancel login, simply warn online staff
+                System.out.println("[IPHub] Player's IP was detected as a possible VPN: " + event.getName() + ", " + iphr.ip);
                 adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.vpnPossible")), event.getName(), iphr), "iphub.warnblock2");
                 pause.removeConnectionPause();
                 return;
@@ -86,6 +102,7 @@ public class PlayerHandler extends PlayerListener
 
             if (iphr != null && iphr.block == 1)
             {
+                System.out.println("[IPHub] Player's IP was detected as a VPN: " + event.getName() + ", " + iphr.ip);
                 event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.vpnDetected"))));
                 adminBroadcast(formatString(String.valueOf(config.getConfigOption("settings.messages.vpnDetectedNotif")), event.getName(), iphr), "iphub.ipalert");
                 pause.removeConnectionPause();
@@ -109,6 +126,7 @@ public class PlayerHandler extends PlayerListener
             }
 
             if (lastStatusCode == 429) needBackupKey = !needBackupKey; // if rate limit is hit, switch keys.
+            System.out.println("[IPHub] Doing fresh API request for player: " + event.getName() + ", " + ip + ", using key: " + (needBackupKey ? "backup" : "primary"));
             try (CloseableHttpClient httpclient = HttpClients.createDefault())
             {
                 HttpGet httpGet = new HttpGet("http://v2.api.iphub.info/ip/" + ip);

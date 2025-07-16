@@ -1,18 +1,9 @@
 package net.oldschoolminecraft.iph;
 
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import com.projectposeidon.johnymuffin.ConnectionPause;
-import net.oldschoolminecraft.iph.IPHub;
 import net.oldschoolminecraft.iph.tracking.LookupManager;
 import net.oldschoolminecraft.iph.util.*;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,15 +12,11 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPreLoginEvent;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class PlayerHandler extends PlayerListener
+public class PlayerHandlerOld extends PlayerListener
 {
     private static final Gson gson = new Gson();
 
@@ -48,9 +35,9 @@ public class PlayerHandler extends PlayerListener
     private String apiKey;
     private String backupKey;
 
-    public PlayerHandler()
+    public PlayerHandlerOld()
     {
-        long minutesTTL = (long) config.getConfigOption("settings.cache.minutesTTL");
+        int minutesTTL = (int) config.getConfigOption("settings.cache.minutesTTL");
         int interval = (int) config.getConfigOption("settings.cache.interval");
         int maxItems = (int) config.getConfigOption("settings.cache.maxItems");
         cache = new MemoryCache<>(TimeUnit.MINUTES.toMillis(minutesTTL), interval, maxItems);
