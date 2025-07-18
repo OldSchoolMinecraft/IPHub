@@ -29,12 +29,13 @@ public class PlayerHandler extends PlayerListener
     private static final Gson gson = new Gson();
 
     private MemoryCache<String, IPHubResponse> cache;
-    private final PLConfig config = IPHub.instance.config;
+    private final PLConfig config;
     private int lastStatusCode = 200;
     private boolean needBackupKey = false;
 
-    public PlayerHandler()
+    public PlayerHandler(IPHub plugin)
     {
+        this.config = plugin.config;
         reloadCacheConfig();
     }
 
@@ -148,7 +149,7 @@ public class PlayerHandler extends PlayerListener
                         return;
                     }
                     if ((Boolean) config.getConfigOption("settings.logging.enabled"))
-                        System.out.println(String.format("[IPHub Log] %s: %s %s, %s (%s)", event.getName(), response.countryCode, ip, response.isp, response.asn));
+                        System.out.println(String.format("[IPHub Log] IP INFO: %s: %s %s, %s (%s)", event.getName(), response.countryCode, ip, response.isp, response.asn));
                     if (response.block == 1)
                     {
                         event.cancelPlayerLogin(ColorUtil.translateAlternateColorCodes('&', String.valueOf(config.getConfigOption("settings.messages.vpnDetected"))));

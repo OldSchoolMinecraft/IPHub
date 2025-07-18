@@ -24,7 +24,7 @@ public class IPHub extends JavaPlugin
     public void onEnable()
     {
         instance = this;
-        playerHandler = new PlayerHandler();
+        playerHandler = new PlayerHandler(this);
         updateManager = new UpdateManager(this, "https://micro.os-mc.net/plugin_ci/IPHub/latest");
         config = new PLConfig();
         lookupManager = new LookupManager();
